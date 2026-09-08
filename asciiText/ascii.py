@@ -1,13 +1,15 @@
 from PIL import Image
 import os
 
-ASCII_CHARS = " .:-=+*#%@"
+# Luminance ramp: lightest (space) to darkest (full block █)
+ASCII_CHARS = " .:-=+*#%@\u2591\u2592\u2593\u2588"  # + ░▒▓█
 CHAR_LEN = len(ASCII_CHARS)
 BLOCK_CHAR = "\u2588"  # full block █ for pixel mode
 
 
 def _char_for_luminance(lum):
-    return ASCII_CHARS[lum * CHAR_LEN // 256]
+    # dark pixels -> dense chars (█), bright pixels -> space
+    return ASCII_CHARS[(255 - lum) * CHAR_LEN // 256]
 
 
 def _rgb_to_ansi_truecolor(r, g, b):
