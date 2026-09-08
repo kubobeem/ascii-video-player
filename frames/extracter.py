@@ -8,7 +8,7 @@ def extract_frames_live(video_path='downloads/video.mp4', output_folder='vidFram
     cmd = [
         'ffmpeg',
         '-i', video_path,
-        '-vf', f'scale={width}:{height},format=gray',
+        '-vf', f'scale={width}:{height}',
         '-r', str(fps),
         f'{output_folder}/frame_%04d.png'
     ]

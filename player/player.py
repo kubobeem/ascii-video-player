@@ -6,7 +6,7 @@ def play_ascii_frames(folder='asciiFrames', fps=15):
     seen = set()
     delay = 1.0 / fps
 
-    print("[🎬] Starting playback...")
+    print("[PLAY] Starting playback...")
 
     while True:
         frames = sorted(glob.glob(f"{folder}/frame_*.txt"))
@@ -16,7 +16,7 @@ def play_ascii_frames(folder='asciiFrames', fps=15):
 
         if not new_frames:
             if _is_ascii_conversion_done(folder):
-                print("[✅] Playback complete.")
+                print("[DONE] Playback complete.")
                 break
             time.sleep(0.1)
             continue

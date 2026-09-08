@@ -1,2 +1,13 @@
-.venv
-.idea
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 実行時に生成される一時ファイル
+downloads/
+vidFrames/
+asciiFrames/
+*.tmp
+
+# IDE
+.idea/
