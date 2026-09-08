@@ -4,46 +4,47 @@ import time
 from multiprocessing import Pool
 from asciiText.ascii import convert_and_save_ascii
 
+DONE_FLAG = "_DONE"
+
+
 def convert_and_save_ascii_wrapper(frame_path, output_dir, pixel_mode=False):
     convert_and_save_ascii(frame_path, output_folder=output_dir, pixel_mode=pixel_mode)
 
-def watch_and_convert(output_folder="vidFrames", ascii_output="asciiFrames", batch_size=90, poll_interval=1, pixel_mode=False):
+
+def watch_and_convert(output_folder="vidFrames", ascii_output="asciiFrames",
+                      poll_interval=0.1, pixel_mode=False, ffmpeg_proc=None):
     seen = set()
+    done_flag = os.path.join(ascii_output, DONE_FLAG)
 
-    while True:
-        frames = sorted(glob.glob(f"{output_folder}/frame_*.png"))
-        new = [f for f in frames if f not in seen]
-
-        if len(new) >= batch_size:
-            batch = new[:batch_size]
-            args = [(frame, ascii_output, pixel_mode) for frame in batch]
-
-            with Pool() as pool:
-                pool.starmap(convert_and_save_ascii_wrapper, args)
-
-            seen.update(batch)
-
-        elif new:
-            # ffmpeg is done but frames remain: convert the rest in one go
-            args = [(frame, ascii_output, pixel_mode) for frame in new]
-
-            with Pool() as pool:
-                pool.starmap(convert_and_save_ascii_wrapper, args)
-
-            seen.update(new)
-            break
-
-        elif not is_ffmpeg_running():
-            break
-
-        time.sleep(poll_interval)
-
-def is_ffmpeg_running():
+    # Reuse one pool for the whole run - spawning per batch is very slow on Windows
+    pool = Pool()
     try:
-        import psutil
-        for proc in psutil.process_iter(['name']):
-            if proc.info['name'] and 'ffmpeg' in proc.info['name'].lower():
-                return True
-    except Exception as e:
-        print(f"[WARN] Could not check ffmpeg process: {e}")
-    return False
+        while True:
+            frames = sorted(glob.glob(f"{output_folder}/frame_*.png"))
+            new = [f for f in frames if f not in seen]
+
+            if new:
+                # Stream: convert whatever just appeared, in order
+                args = [(frame, ascii_output, pixel_mode) for frame in new]
+                pool.starmap(convert_and_save_ascii_wrapper, args)
+                seen.update(new)
+
+            # ffmpeg finished when its process object is gone (None or poll() != None)
+            ffmpeg_done = ffmpeg_proc is None or ffmpeg_proc.poll() is not None
+            if ffmpeg_done and not new:
+                # Give ffmpeg a moment to flush its last frames, then make sure
+                # nothing appeared before declaring the conversion complete
+                time.sleep(0.5)
+                remaining = [f for f in sorted(glob.glob(f"{output_folder}/frame_*.png")) if f not in seen]
+                if remaining:
+                    args = [(frame, ascii_output, pixel_mode) for frame in remaining]
+                    pool.starmap(convert_and_save_ascii_wrapper, args)
+                    seen.update(remaining)
+                with open(done_flag, "w", encoding="utf-8") as f:
+                    f.write("done")
+                break
+
+            time.sleep(poll_interval)
+    finally:
+        pool.close()
+        pool.join()

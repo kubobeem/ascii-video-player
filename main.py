@@ -28,7 +28,7 @@ def main():
     ffmpeg_proc = extract_frames_live()
 
     print("Launching ASCII converter thread...")
-    converter_thread = Thread(target=watch_and_convert, kwargs={"pixel_mode": args.pixel})
+    converter_thread = Thread(target=watch_and_convert, kwargs={"pixel_mode": args.pixel, "ffmpeg_proc": ffmpeg_proc})
     converter_thread.start()
 
     print("Launching ASCII playback thread...")
