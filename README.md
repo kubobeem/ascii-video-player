@@ -1,5 +1,17 @@
 # 🎞️ ASCII Video Player (Color Fork)
 
+# ちらつきをなくしてカラフルで種類をちょっと増やしたfork https://x.com/qa_a_aa/status/2097315715124768954?s=20 がれいです！
+
+This is Garei's fork of [qa_a_aa's project](https://x.com/qa_a_aa/status/2097315715124768954?s=20).
+
+
+### Key Features / Changes
+- Eliminated screen flickering
+- Made it more colorful
+- Slightly increased the variety of options
+
+- 
+
 A real-time terminal video player that converts **YouTube videos to colorful ASCII art**, streams them frame-by-frame, and renders them directly in your terminal — all offline, and built from scratch.
 
 > Fork of [AddisionS/ascii-video-player](https://github.com/AddisionS/ascii-video-player) with **24-bit truecolor (ANSI) support**.
@@ -52,4 +64,4 @@ Then paste a YouTube URL when prompted.
 - `ffmpeg` — frame extraction
 - `Pillow` — image processing
 - `multiprocessing` & `threading` — real-time parallel conversion + playback
-- `shutil`, `atexit`, `signal` — safe cleanup
+- `shutil`, `atexit`, `signal` — safe cleanup
